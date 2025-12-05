@@ -1,29 +1,12 @@
 import Image from "next/image";
 import ChatBot from "./components/ChatBot";
+import NavBar from "./components/NavBar";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white border-b border-gray-200 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="text-2xl font-bold text-blue-600">∞8</div>
-              <span className="text-xl font-semibold text-gray-900">Infinity8</span>
-            </div>
-            <div className="hidden md:flex space-x-8">
-              <a href="#spaces" className="text-gray-600 hover:text-blue-600 transition">Spaces</a>
-              <a href="#amenities" className="text-gray-600 hover:text-blue-600 transition">Amenities</a>
-              <a href="#pricing" className="text-gray-600 hover:text-blue-600 transition">Pricing</a>
-              <a href="#contact" className="text-gray-600 hover:text-blue-600 transition">Contact</a>
-            </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
-              Book Tour
-            </button>
-          </div>
-        </div>
-      </nav>
+      <NavBar />
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-white">
@@ -54,20 +37,33 @@ export default function Home() {
             {[
               {
                 title: "Hot Desks",
-                description: "Flexible workspace with no fixed seating. Perfect for freelancers and remote workers."
+                description: "Flexible workspace with no fixed seating. Perfect for freelancers and remote workers.",
+                image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop"
               },
               {
                 title: "Private Offices",
-                description: "Dedicated offices for teams of all sizes with 24/7 access and customization options."
+                description: "Dedicated offices for teams of all sizes with 24/7 access and customization options.",
+                image: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&h=600&fit=crop"
               },
               {
                 title: "Meeting Rooms",
-                description: "Professional meeting spaces equipped with AV technology and high-speed internet."
+                description: "Professional meeting spaces equipped with AV technology and high-speed internet.",
+                image: "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=800&h=600&fit=crop"
               }
             ].map((feature, idx) => (
-              <div key={idx} className="bg-white rounded-lg p-8 border border-gray-200 hover:border-blue-600 transition shadow-sm">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+              <div key={idx} className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-blue-600 transition shadow-sm hover:shadow-lg">
+                <div className="relative h-48 w-full">
+                  <Image
+                    src={feature.image}
+                    alt={feature.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-8">
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
+                </div>
               </div>
             ))}
           </div>

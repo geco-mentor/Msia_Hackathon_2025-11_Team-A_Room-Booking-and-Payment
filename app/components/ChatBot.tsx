@@ -14,8 +14,9 @@ const detectLanguage = (text: string): 'english' | 'malay' | 'chinese' => {
 
   if (hasChineseChars) return 'chinese';
 
-  const englishWords = ['what', 'where', 'how', 'when', 'why', 'who', 'the', 'is', 'are', 'can', 'could', 'would', 'should', 'have', 'has', 'do', 'does', 'please', 'thank', 'thanks', 'yes', 'no', 'hello', 'hi'];
-  const malayWords = ['apa', 'mana', 'bila', 'kenapa', 'siapa', 'bagaimana', 'berapa', 'ada', 'tidak', 'tak', 'boleh', 'saya', 'kami', 'anda', 'awak', 'ini', 'itu', 'di', 'ke', 'dari', 'untuk', 'dengan', 'yang', 'dan', 'atau', 'jika', 'kalau', 'bilik', 'pejabat', 'harga', 'tempah', 'ruang', 'kerja', 'tolong', 'terima', 'kasih', 'ya', 'bukan', 'mahu', 'nak', 'ingin'];
+  // Expanded word lists for better detection
+  const englishWords = ['what', 'where', 'how', 'when', 'why', 'who', 'the', 'is', 'are', 'can', 'could', 'would', 'should', 'have', 'has', 'do', 'does', 'please', 'thank', 'thanks', 'yes', 'no', 'hello', 'hi', 'room', 'rooms', 'office', 'offices', 'price', 'pricing', 'book', 'booking', 'available', 'want', 'need', 'like', 'about', 'your', 'you', 'this', 'that', 'there', 'here', 'tell', 'me', 'i', 'my', 'we', 'our', 'they', 'it', 'a', 'an', 'of', 'to', 'for', 'in', 'on', 'at', 'with', 'by', 'from', 'meeting', 'space', 'spaces', 'desk', 'hot'];
+  const malayWords = ['apa', 'mana', 'bila', 'kenapa', 'siapa', 'bagaimana', 'berapa', 'ada', 'tidak', 'tak', 'boleh', 'saya', 'kami', 'anda', 'awak', 'ini', 'itu', 'ke', 'dari', 'untuk', 'dengan', 'yang', 'dan', 'atau', 'jika', 'kalau', 'bilik', 'pejabat', 'harga', 'tempah', 'ruang', 'kerja', 'tolong', 'terima', 'kasih', 'bukan', 'mahu', 'nak', 'ingin', 'macam', 'mane', 'kat', 'dekat', 'hendak', 'jenis', 'pilihan', 'pilih', 'kita', 'mereka', 'dia', 'bagi', 'lagi', 'sudah', 'dah', 'belum', 'akan', 'masih', 'begitu', 'sahaja', 'saje', 'jer', 'je', 'pun', 'juga', 'tu', 'ni', 'pakej', 'langganan', 'bulanan', 'sewa'];
 
   let englishScore = 0;
   let malayScore = 0;
@@ -26,8 +27,13 @@ const detectLanguage = (text: string): 'english' | 'malay' | 'chinese' => {
     if (malayWords.includes(word)) malayScore++;
   }
 
-  // Only flip to Malay when there is strong evidence; default to English otherwise.
-  if ((malayScore >= 2 && malayScore > englishScore) || (malayScore > 0 && englishScore === 0)) return 'malay';
+  // Prioritize the language with more matches
+  if (englishScore > malayScore && englishScore >= 1) return 'english';
+  if (malayScore > englishScore && malayScore >= 1) return 'malay';
+  if (englishScore >= 1 && malayScore === 0) return 'english';
+  if (malayScore >= 1 && englishScore === 0) return 'malay';
+  
+  // Default to English if no clear signal
   return 'english';
 };
 

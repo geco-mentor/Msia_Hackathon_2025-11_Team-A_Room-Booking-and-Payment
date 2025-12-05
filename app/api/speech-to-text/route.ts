@@ -63,8 +63,10 @@ export async function POST(request: NextRequest) {
 
 function getLanguageSignals(text: string) {
   const lowerText = text.toLowerCase();
-  const englishWords = ['what', 'where', 'how', 'when', 'why', 'who', 'the', 'is', 'are', 'can', 'could', 'would', 'should', 'have', 'has', 'do', 'does', 'please', 'thank', 'thanks', 'yes', 'no', 'hello', 'hi', 'room', 'office', 'price', 'pricing', 'book', 'available', 'want', 'need', 'like', 'about', 'your', 'you', 'this', 'that', 'there', 'here'];
-  const malayWords = ['apa', 'mana', 'bila', 'kenapa', 'siapa', 'bagaimana', 'berapa', 'ada', 'tidak', 'tak', 'boleh', 'saya', 'kami', 'anda', 'awak', 'ini', 'itu', 'di', 'ke', 'dari', 'untuk', 'dengan', 'yang', 'dan', 'atau', 'jika', 'kalau', 'bilik', 'pejabat', 'harga', 'tempah', 'ruang', 'kerja', 'tolong', 'terima', 'kasih', 'ya', 'bukan', 'mahu', 'nak', 'ingin', 'sini', 'sana', 'terdapat', 'tersedia'];
+  // Expanded English word list with common conversational words
+  const englishWords = ['what', 'where', 'how', 'when', 'why', 'who', 'the', 'is', 'are', 'can', 'could', 'would', 'should', 'have', 'has', 'do', 'does', 'please', 'thank', 'thanks', 'yes', 'no', 'hello', 'hi', 'room', 'rooms', 'office', 'offices', 'price', 'pricing', 'book', 'booking', 'available', 'want', 'need', 'like', 'about', 'your', 'you', 'this', 'that', 'there', 'here', 'tell', 'me', 'i', 'my', 'we', 'our', 'they', 'it', 'a', 'an', 'of', 'to', 'for', 'in', 'on', 'at', 'with', 'by', 'from', 'up', 'out', 'if', 'or', 'and', 'but', 'so', 'as', 'any', 'all', 'each', 'more', 'most', 'other', 'some', 'such', 'only', 'own', 'same', 'than', 'too', 'very', 'just', 'also', 'now', 'know', 'get', 'go', 'come', 'make', 'see', 'look', 'find', 'give', 'tell', 'ask', 'work', 'seem', 'feel', 'try', 'leave', 'call', 'meeting', 'space', 'spaces', 'desk', 'hot'];
+  // Malay words - distinct words that don't appear in English
+  const malayWords = ['apa', 'mana', 'bila', 'kenapa', 'siapa', 'bagaimana', 'berapa', 'ada', 'tidak', 'tak', 'boleh', 'saya', 'kami', 'anda', 'awak', 'ini', 'itu', 'ke', 'dari', 'untuk', 'dengan', 'yang', 'dan', 'atau', 'jika', 'kalau', 'bilik', 'pejabat', 'harga', 'tempah', 'ruang', 'kerja', 'tolong', 'terima', 'kasih', 'bukan', 'mahu', 'nak', 'ingin', 'sini', 'sana', 'terdapat', 'tersedia', 'macam', 'mane', 'kat', 'dekat', 'hendak', 'jenis', 'pilihan', 'pilih', 'kita', 'mereka', 'dia', 'kami', 'bagi', 'lagi', 'sudah', 'dah', 'belum', 'akan', 'masih', 'situ', 'begitu', 'begini', 'sahaja', 'saje', 'jer', 'je', 'pun', 'juga', 'lah', 'kah', 'kan', 'tu', 'ni', 'pakej', 'langganan', 'bulanan', 'sewa'];
   const hasChineseChars = /[\u4e00-\u9fff]/.test(text);
 
   let englishScore = 0;
@@ -84,19 +86,26 @@ function decideLanguage(whisperLanguage?: string, text?: string): 'english' | 'm
   if (!text || text.trim().length === 0) return whisper || 'english';
 
   const { englishScore, malayScore, hasChineseChars } = getLanguageSignals(text);
+  
+  // Chinese has clear character markers
   if (hasChineseChars) return 'chinese';
 
-  // If Whisper is confident, trust it unless the text strongly disagrees.
-  if (whisper === 'english' && malayScore < 2) return 'english';
-  if (whisper === 'malay' && englishScore < 2) return 'malay';
+  // If Whisper provided a language, trust it unless text strongly disagrees
+  if (whisper === 'english') {
+    if (malayScore >= englishScore + 2 && malayScore >= 2) return 'malay';
+    return 'english';
+  }
+  if (whisper === 'malay') {
+    if (englishScore >= malayScore + 2 && englishScore >= 3) return 'english';
+    return 'malay';
+  }
   if (whisper === 'chinese') return 'chinese';
 
-  // Heuristic tie-breakers.
-  if (englishScore >= malayScore + 1 && englishScore >= 2) return 'english';
-  if (malayScore >= englishScore + 1 && malayScore >= 1) return 'malay';
+  // No Whisper hint: fall back to text signals
+  if (malayScore >= 2 && malayScore >= englishScore) return 'malay';
+  if (englishScore >= 1 && englishScore >= malayScore) return 'english';
 
-  // Fallback to Whisper hint or default English.
-  return whisper || 'english';
+  return 'english';
 }
 
 function mapWhisperLanguage(language?: string): 'english' | 'malay' | 'chinese' | undefined {
