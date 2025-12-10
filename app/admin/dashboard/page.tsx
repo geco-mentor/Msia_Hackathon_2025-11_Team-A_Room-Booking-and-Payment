@@ -5,7 +5,7 @@ import AdminSidebar from './components/AdminSidebar'
 import AdminHeader from './components/AdminHeader'
 
 export default async function AdminDashboardPage() {
-  const supabase = await createClient()
+  const supabase = await createClient('admin')
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {

@@ -42,7 +42,7 @@ export default function AdminSignupPage() {
     }
 
     try {
-      const supabase = createClient()
+      const supabase = createClient('admin')
       
       // Sign up with admin role in metadata
       const { data, error: signUpError } = await supabase.auth.signUp({

@@ -1,7 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getSupabaseCookieName, type SupabaseAuthScope } from './auth'
 
-export async function createClient() {
+export async function createClient(scope: SupabaseAuthScope = 'user') {
   const cookieStore = await cookies()
 
   return createServerClient(
@@ -23,6 +24,9 @@ export async function createClient() {
             // user sessions.
           }
         },
+      },
+      cookieOptions: {
+        name: getSupabaseCookieName(scope),
       },
     }
   )

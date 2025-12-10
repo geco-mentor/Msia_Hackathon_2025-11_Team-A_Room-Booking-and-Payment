@@ -16,7 +16,7 @@ export default function AdminHeader({ profile }: AdminHeaderProps) {
   const router = useRouter()
 
   const handleSignOut = async () => {
-    const supabase = createClient()
+    const supabase = createClient('admin')
     await supabase.auth.signOut()
     router.push('/admin/login')
     router.refresh()

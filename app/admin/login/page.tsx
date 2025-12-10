@@ -40,7 +40,7 @@ function AdminLoginForm() {
     setError(null)
     setInfo(null)
     
-    const supabase = createClient()
+    const supabase = createClient('admin')
     
     const { error: resendError } = await supabase.auth.resend({
       type: 'signup',
@@ -66,7 +66,7 @@ function AdminLoginForm() {
     setError(null)
     setInfo(null)
 
-    const supabase = createClient()
+    const supabase = createClient('admin')
     
     // First, sign in
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({

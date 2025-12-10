@@ -7,6 +7,7 @@ from app.config import get_settings
 from app.api.chat import router as chat_router
 from app.api.webhooks import router as webhooks_router
 from app.api.bookings import router as bookings_router
+from app.api.knowledge_base import router as knowledge_base_router
 
 settings = get_settings()
 
@@ -40,6 +41,7 @@ app.add_middleware(
 app.include_router(chat_router, prefix=settings.API_V1_PREFIX)
 app.include_router(webhooks_router, prefix=settings.API_V1_PREFIX)
 app.include_router(bookings_router, prefix=settings.API_V1_PREFIX)
+app.include_router(knowledge_base_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
