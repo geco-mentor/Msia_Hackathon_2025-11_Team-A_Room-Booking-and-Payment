@@ -1,10 +1,57 @@
 # Infinity8 - Smart Coworking Space Platform
 
-A comprehensive, AI-powered coworking space management platform for Infinity8, Malaysia's premier coworking space company. Built with Next.js, FastAPI, and powered by advanced AI agents.
+A comprehensive, AI-powered coworking space management platform for Infinity8, Malaysia's premier coworking space company. Built with Next.js, FastAPI, and powered by advanced AI agents including an intelligent WhatsApp booking bot.
 
 ## 🎯 Overview
 
-Infinity8 is a full-stack platform that combines beautiful user-facing features with powerful admin tools, all enhanced by AI capabilities including natural language booking, intelligent chatbots, and RAG-powered knowledge management.
+Infinity8 is a full-stack platform that combines beautiful user-facing features with powerful admin tools, all enhanced by AI capabilities including natural language booking, intelligent chatbots, WhatsApp automation, and RAG-powered knowledge management.
+
+## 📁 Project Structure
+
+This is a monorepo containing frontend, backend, and WhatsApp bot applications:
+
+```
+geco01/
+├── frontend/          # Next.js frontend application
+│   ├── app/          # Next.js app directory
+│   ├── lib/          # Shared utilities
+│   ├── public/       # Static assets
+│   └── ...
+├── backend/          # FastAPI backend application
+│   ├── app/          # FastAPI application
+│   └── ...
+├── whatsapp-bot/     # WhatsApp booking bot
+│   ├── index.js      # Main bot server
+│   ├── prompts.js    # AI conversation prompts
+│   ├── invoices/     # Generated PDF invoices
+│   └── README.md     # WhatsApp bot documentation
+└── README.md         # This file
+```
+
+### Getting Started
+
+#### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+#### Backend Setup
+```bash
+cd backend
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
+```
+
+#### WhatsApp Bot Setup
+```bash
+cd whatsapp-bot
+npm install
+npm start
+```
+
+See individual README files in `frontend/`, `backend/`, and `whatsapp-bot/` directories for detailed setup instructions.
 
 ## ✨ Key Features
 
@@ -16,6 +63,18 @@ Infinity8 is a full-stack platform that combines beautiful user-facing features 
 - **Voice Support**: Speech-to-text booking with ElevenLabs integration
 - **Payment Integration**: Secure Stripe checkout with automatic email confirmations
 - **Multi-location Support**: Kuala Lumpur, Petaling Jaya, and Johor Bahru
+
+#### WhatsApp Booking Bot 📱
+- **24/7 Automated Bookings**: Book meeting rooms via WhatsApp anytime
+- **Natural Language AI**: GPT-4 powered conversations for seamless booking
+- **Smart Date Parsing**: Understands "tomorrow", "next Friday", relative dates
+- **Real-time Availability**: Automatic conflict detection and prevention
+- **Payment Processing**: Secure Stripe checkout with 30-minute booking hold
+- **Add-ons System**: Projectors, LCD screens, extra chairs with per-hour pricing
+- **Automated Invoicing**: PDF invoices generated and sent via WhatsApp
+- **Cancellation Management**: 24-hour policy with automated refunds
+- **Multi-booking Support**: Manage multiple bookings per user
+- **Payment Reminders**: 10-minute warnings before booking expiration
 
 #### AI Chatbot 🤖
 - **Intelligent Q&A**: Answers questions about pricing, amenities, locations, and more
@@ -79,6 +138,15 @@ Infinity8 is a full-stack platform that combines beautiful user-facing features 
 - **PDF Generation**: FPDF2
 - **QR Codes**: Segno
 
+### WhatsApp Bot Stack
+- **Runtime**: Node.js + Express
+- **AI**: OpenAI GPT-4 (gpt-4o-mini)
+- **Messaging**: Twilio WhatsApp Business API
+- **Database**: MongoDB Atlas
+- **Payments**: Stripe Checkout & Webhooks
+- **PDF Generation**: PDFKit
+- **Development**: ngrok for local webhook testing
+
 ### AI & ML
 - **LangGraph**: Orchestrates multi-step AI agent workflows
 - **LangChain**: Tool calling, prompt management, and chains
@@ -95,13 +163,15 @@ Infinity8 is a full-stack platform that combines beautiful user-facing features 
 - OpenAI API key
 - Stripe account
 - Resend account (for emails)
+- Twilio account (for WhatsApp bot)
+- MongoDB Atlas account (for WhatsApp bot)
 
 ### Frontend Setup
 
 1. **Clone and install dependencies**
 ```bash
 git clone <repository-url>
-cd geco01
+cd geco01/frontend
 npm install
 ```
 
@@ -169,6 +239,67 @@ uvicorn app.main:app --reload
 
 API will be available at [http://localhost:8000](http://localhost:8000)
 
+### WhatsApp Bot Setup
+
+1. **Navigate to WhatsApp bot directory**
+```bash
+cd whatsapp-bot
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Configure environment variables**
+Create `.env` in the `whatsapp-bot/` directory:
+```env
+# Twilio Configuration
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+
+# OpenAI Configuration
+OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxx
+
+# Stripe Configuration
+STRIPE_SECRET_KEY=xxxxxxxxxxxxxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
+
+# MongoDB Configuration
+MONGO_DB=mongodb+srv://username:password@cluster.mongodb.net/infinity8?retryWrites=true&w=majority
+
+# Server Configuration
+PORT=3000
+BASE_URL=http://localhost:3000
+```
+
+4. **Set up ngrok for local development**
+```bash
+# In a separate terminal
+ngrok http 3000
+```
+
+5. **Configure Twilio webhook**
+- Copy ngrok HTTPS URL (e.g., `https://abc-123.ngrok-free.app`)
+- Go to [Twilio Console](https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn)
+- Set webhook: `https://abc-123.ngrok-free.app/whatsapp`
+- Method: POST
+
+6. **Configure Stripe webhook**
+- Go to [Stripe Dashboard](https://dashboard.stripe.com/test/webhooks)
+- Add endpoint: `https://abc-123.ngrok-free.app/stripe-webhook`
+- Select events: `checkout.session.completed`, `checkout.session.expired`
+
+7. **Run the WhatsApp bot**
+```bash
+npm start
+```
+
+Bot will be available at [http://localhost:3000](http://localhost:3000)
+
+See `whatsapp-bot/README.md` for detailed WhatsApp bot documentation.
+
 ### Database Setup
 
 1. **Create Supabase project**
@@ -189,31 +320,44 @@ supabase/migrations/004_create_knowledge_base_bucket.sql
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-## 📁 Project Structure
+4. **Create MongoDB database (for WhatsApp bot)**
+   - Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+   - Create a new cluster
+   - Create database named `infinity8`
+   - Add collections: `rooms`, `bookings`
+   - Configure network access (allow 0.0.0.0/0 for development)
+
+## 📁 Detailed Project Structure
 
 ```
 geco01/
-├── app/                                 # Next.js frontend
-│   ├── admin/                          # Admin panel
-│   │   ├── dashboard/                  # Admin dashboard with AI assistant
-│   │   ├── bookings/                   # Booking management
-│   │   ├── spaces/                     # Space analytics & management
-│   │   └── knowledge-base/             # RAG knowledge base management
-│   ├── api/                            # Next.js API routes
-│   │   ├── chat/                       # User chatbot API
-│   │   ├── admin/chat/                 # Admin chatbot API
-│   │   ├── speech-to-text/             # Voice input processing
-│   │   └── voice/                      # Text-to-speech API
-│   ├── auth/                           # Authentication pages
-│   ├── bookings/                       # Booking success/cancel pages
-│   ├── components/                     # Reusable React components
-│   │   ├── ChatBot.tsx                # Main AI chatbot
-│   │   ├── BookingAgent.tsx           # Natural language booking
-│   │   ├── NavBar.tsx                 # Navigation component
-│   │   └── AuthProvider.tsx           # Auth context
-│   ├── dashboard/                      # User dashboard
-│   ├── page.tsx                        # Landing page
-│   └── layout.tsx                      # Root layout
+├── frontend/                           # Next.js frontend
+│   ├── app/                            # Next.js app directory
+│   │   ├── admin/                      # Admin panel
+│   │   │   ├── dashboard/              # Admin dashboard with AI assistant
+│   │   │   ├── bookings/               # Booking management
+│   │   │   ├── spaces/                 # Space analytics & management
+│   │   │   └── knowledge-base/         # RAG knowledge base management
+│   │   ├── api/                        # Next.js API routes
+│   │   │   ├── chat/                   # User chatbot API
+│   │   │   ├── admin/chat/             # Admin chatbot API
+│   │   │   ├── speech-to-text/         # Voice input processing
+│   │   │   └── voice/                  # Text-to-speech API
+│   │   ├── auth/                       # Authentication pages
+│   │   ├── bookings/                   # Booking success/cancel pages
+│   │   ├── components/                 # Reusable React components
+│   │   │   ├── ChatBot.tsx            # Main AI chatbot
+│   │   │   ├── BookingAgent.tsx       # Natural language booking
+│   │   │   ├── NavBar.tsx             # Navigation component
+│   │   │   └── AuthProvider.tsx       # Auth context
+│   │   ├── dashboard/                  # User dashboard
+│   │   ├── page.tsx                    # Landing page
+│   │   └── layout.tsx                  # Root layout
+│   ├── lib/                            # Shared utilities
+│   │   └── supabase/                   # Supabase client configs
+│   ├── public/                         # Static assets
+│   ├── package.json                    # Node dependencies
+│   └── README.md                       # Frontend documentation
 │
 ├── backend/                            # Python FastAPI backend
 │   ├── app/
@@ -238,7 +382,18 @@ geco01/
 │   │   │   └── supabase.py           # Database client
 │   │   ├── config.py                 # Configuration
 │   │   └── main.py                   # FastAPI app
-│   └── requirements.txt               # Python dependencies
+│   ├── requirements.txt               # Python dependencies
+│   └── README.md                      # Backend documentation
+│
+├── whatsapp-bot/                      # WhatsApp booking bot
+│   ├── index.js                       # Main bot server & Express app
+│   ├── prompts.js                     # GPT-4 conversation prompts
+│   ├── invoiceGenerator.js            # PDF invoice generation
+│   ├── paymentPages.js                # Payment success/cancel HTML
+│   ├── invoices/                      # Generated PDF invoices
+│   ├── package.json                   # Node dependencies
+│   ├── .env.example                   # Environment template
+│   └── README.md                      # WhatsApp bot documentation
 │
 ├── supabase/                          # Database migrations
 │   └── migrations/
@@ -247,16 +402,12 @@ geco01/
 │       ├── 003_knowledge_base_rag.sql
 │       └── 004_create_knowledge_base_bucket.sql
 │
-├── lib/                               # Shared utilities
-│   └── supabase/                     # Supabase client configs
-│
-├── package.json                       # Node dependencies
 └── README.md                          # This file
 ```
 
 ## 🤖 AI Agent Capabilities
 
-The LangGraph-based AI agent can:
+### Web/App AI Agent (LangGraph)
 - **Check Availability**: Query real-time space availability
 - **Create Bookings**: Process natural language booking requests
 - **Handle Payments**: Integrate with Stripe for secure payments
@@ -265,8 +416,19 @@ The LangGraph-based AI agent can:
 - **User Management**: Retrieve and update user information
 - **Multi-turn Conversations**: Maintain context across interactions
 
+### WhatsApp Bot AI Features
+- **Natural Language Understanding**: Interprets casual booking requests
+- **Smart Date Parsing**: Converts "tomorrow", "next week" to actual dates
+- **Add-on Recognition**: Understands equipment requests in natural language
+- **Conflict Detection**: Prevents double bookings automatically
+- **Payment Flow Management**: Guides users through secure checkout
+- **Cancellation Handling**: Manages refunds based on 24-hour policy
+- **Multi-booking Support**: Handles multiple bookings per conversation
+- **Reminder System**: Sends payment expiration warnings
+
 ## 💳 Payment Flow
 
+### Web/App Payment Flow
 1. User makes booking request (via agent or form)
 2. Agent validates availability and pricing
 3. Stripe checkout session created
@@ -279,6 +441,16 @@ The LangGraph-based AI agent can:
    - PDF invoice (optional)
    - Check-in link
 
+### WhatsApp Bot Payment Flow
+1. User books via WhatsApp conversation
+2. Bot validates availability and calculates pricing
+3. Stripe checkout link sent to WhatsApp
+4. User pays within 30 minutes
+5. Webhook confirms payment
+6. Bot sends confirmation message
+7. PDF invoice sent via WhatsApp
+8. Booking saved to MongoDB
+
 ## 🔐 Authentication & Security
 
 - **Supabase Auth**: Row-level security (RLS) enabled
@@ -286,10 +458,12 @@ The LangGraph-based AI agent can:
 - **Admin Routes**: Protected admin-only pages
 - **Stripe Webhooks**: Signature verification
 - **Environment Variables**: Secure credential management
+- **Twilio Webhooks**: Request validation for WhatsApp messages
+- **MongoDB Security**: Username/password authentication with network restrictions
 
 ## 📊 Database Schema
 
-### Main Tables
+### Supabase (PostgreSQL)
 - **users**: User accounts and profiles
 - **spaces**: Available workspaces
 - **bookings**: Booking records
@@ -298,26 +472,79 @@ The LangGraph-based AI agent can:
 - **knowledge_base_chunks**: Vector embeddings for semantic search
 - **unanswered_queries**: Track failed AI responses
 
+### MongoDB (WhatsApp Bot)
+- **rooms**: Meeting room information (name, price, seats, projector)
+- **bookings**: WhatsApp booking records with payment and refund tracking
+
+Example booking document:
+```javascript
+{
+  whatsappNumber: String,       // User's WhatsApp number
+  userName: String,             // User's profile name
+  roomName: String,             // "A", "B", "C"
+  date: String,                 // "2025-12-15"
+  time: String,                 // "14:00-16:00"
+  status: String,               // "pending", "completed", "cancelled", "refunded"
+  adds: [String],               // ["projector x2", "chairs x5"]
+  paymentSessionId: String,     // Stripe session ID
+  paymentIntentId: String,      // Stripe payment intent ID
+  invoiceNumber: String,        // "INV-202512-00001"
+  amountPaid: Number,           // Total amount in MYR
+  refundAmount: Number,         // Refund amount if applicable
+  refundId: String,             // Stripe refund ID
+  expiresAt: Date,              // Booking expiration (for pending)
+  createdAt: Date               // Booking creation time
+}
+```
+
 ## 🚀 Deployment
 
 ### Frontend (Vercel)
 ```bash
+cd frontend
 npm run build
 vercel deploy
 ```
 
 ### Backend (Railway/Render/Heroku)
 ```bash
-# Build
+cd backend
 pip install -r requirements.txt
-
-# Run
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
+
+### WhatsApp Bot (Railway/Render)
+
+**Railway Deployment:**
+1. Create Railway account at [railway.app](https://railway.app)
+2. Create new project from GitHub repo
+3. Add environment variables in Railway dashboard
+4. Deploy - Railway auto-deploys from main branch
+5. Update Twilio webhook with Railway URL
+6. Update Stripe webhook with Railway URL
+
+**Render Deployment:**
+1. Create Render account at [render.com](https://render.com)
+2. New Web Service from GitHub
+3. Configure:
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+4. Add environment variables
+5. Deploy
+6. Update webhooks with Render URL
+
+**Production Checklist:**
+- ✅ Use production Stripe keys
+- ✅ Upgrade Twilio from sandbox to WhatsApp Business
+- ✅ Set up proper domain (not ngrok)
+- ✅ Enable MongoDB Atlas IP whitelist for production
+- ✅ Configure automatic backups for MongoDB
+- ✅ Set up error monitoring (Sentry, LogRocket)
 
 ### Environment Configuration
 Update environment variables in production:
 - Set `FRONTEND_URL` to your deployed frontend URL
+- Set `BASE_URL` to your deployed WhatsApp bot URL
 - Configure `STRIPE_WEBHOOK_SECRET` with production webhook
 - Update CORS settings in `backend/app/main.py`
 
@@ -325,31 +552,54 @@ Update environment variables in production:
 
 ### Frontend
 ```bash
+cd frontend
 npm run lint
 ```
 
 ### Backend
 ```bash
-# Run server
+cd backend
 uvicorn app.main:app --reload
+curl http://localhost:8000/health
+```
+
+### WhatsApp Bot
+```bash
+cd whatsapp-bot
+npm start
 
 # Test endpoints
-curl http://localhost:8000/health
+curl http://localhost:3000/health
+
+# Test WhatsApp webhook (after ngrok setup)
+# Send a WhatsApp message to your Twilio number
 ```
 
 ## 📈 Monitoring & Logging
 
 - **Backend Logs**: FastAPI automatic logging
+- **WhatsApp Bot Logs**: Console logs for message flow and errors
 - **Stripe Dashboard**: Payment and webhook monitoring
 - **Supabase Dashboard**: Database and auth monitoring
+- **MongoDB Atlas**: Database monitoring and alerts
+- **Twilio Console**: WhatsApp message logs and webhook events
 - **OpenAI Usage**: Track API usage and costs
+- **ngrok Inspector**: Local webhook debugging at http://127.0.0.1:4040
 
 ## 🔧 Configuration & Customization
 
 ### Modify AI Behavior
+
+**Web/App Agent:**
 - **Prompts**: Edit `backend/app/agent/prompts.py`
 - **Tools**: Add/modify tools in `backend/app/agent/tools/`
 - **Workflow**: Update graph in `backend/app/agent/graph.py`
+
+**WhatsApp Bot:**
+- **Prompts**: Edit `whatsapp-bot/prompts.js`
+- **Pricing**: Modify `ADDON_PRICES` in `whatsapp-bot/index.js`
+- **Policies**: Update timeout and cancellation hours
+- **Invoice Design**: Customize in `whatsapp-bot/invoiceGenerator.js`
 
 ### Update Knowledge Base
 - Upload documents via admin panel
@@ -357,13 +607,14 @@ curl http://localhost:8000/health
 - Automatic chunking and embedding
 
 ### Customize UI
-- **Colors**: Update Tailwind classes
-- **Components**: Modify in `app/components/`
+- **Colors**: Update Tailwind classes (currently using `#b48c5c` gold theme)
+- **Components**: Modify in `frontend/app/components/`
 - **Layouts**: Edit page layouts in respective directories
+- **Logo**: Replace `/logo.png` in `frontend/public/`
 
 ## 📝 API Documentation
 
-### Main Endpoints
+### Main Web/App Endpoints
 
 **Chat**
 - `POST /api/chat` - User chatbot
@@ -382,7 +633,29 @@ curl http://localhost:8000/health
 **Webhooks**
 - `POST /api/webhooks/stripe` - Stripe webhook handler
 
-Full API documentation available at `http://localhost:8000/docs` when backend is running.
+### WhatsApp Bot Endpoints
+
+**WhatsApp Webhook**
+- `POST /whatsapp` - Receives incoming WhatsApp messages from Twilio
+
+**Stripe Webhook**
+- `POST /stripe-webhook` - Handles payment confirmations and expirations
+
+**Booking Endpoints**
+- `GET /my-bookings/:whatsappNumber` - Get user bookings
+- `POST /cancel-booking` - Cancel a booking
+- `GET /bookings` - Admin: View all bookings
+
+**Health & Status**
+- `GET /health` - Returns server status and MongoDB connection state
+
+**Payment Pages**
+- `GET /payment-success` - Payment confirmation page
+- `GET /payment-cancel` - Payment cancellation page
+
+Full API documentation:
+- **Backend**: Available at `http://localhost:8000/docs` when backend is running
+- **WhatsApp Bot**: See `whatsapp-bot/README.md` for detailed endpoint documentation
 
 ## 🐛 Troubleshooting
 
@@ -411,6 +684,31 @@ Full API documentation available at `http://localhost:8000/docs` when backend is
 - Check document upload size limits
 - Verify OpenAI embeddings quota
 
+**WhatsApp bot not responding**
+- Check server is running (`npm start`)
+- Verify ngrok is running and URL is current
+- Confirm Twilio webhook is configured properly
+- Check MongoDB connection (view console logs)
+- Verify all environment variables are set
+
+**WhatsApp payment not processing**
+- Check Stripe webhook secret is correct
+- Ensure webhook URL in Stripe dashboard matches ngrok URL
+- Verify Stripe test mode is enabled
+- Review Stripe logs for errors
+
+**WhatsApp PDF not sending**
+- Ensure invoice directory exists and is writable
+- Verify BASE_URL is set correctly in `.env`
+- Check if PDF file was generated in `/invoices` folder
+- Confirm Twilio message limit not exceeded (50/day on sandbox)
+
+**MongoDB connection failed**
+- Check connection string format matches: `mongodb+srv://user:pass@cluster.mongodb.net/infinity8`
+- Verify username/password (URL-encode special characters)
+- Add current IP to MongoDB Atlas whitelist (0.0.0.0/0 for testing)
+- Ensure database name `/infinity8` is included in URI
+
 ## 📚 Additional Resources
 
 - [Next.js Documentation](https://nextjs.org/docs)
@@ -418,6 +716,9 @@ Full API documentation available at `http://localhost:8000/docs` when backend is
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
 - [Supabase Documentation](https://supabase.com/docs)
 - [Stripe Documentation](https://stripe.com/docs)
+- [Twilio WhatsApp API](https://www.twilio.com/docs/whatsapp)
+- [MongoDB Atlas Documentation](https://www.mongodb.com/docs/atlas/)
+- [OpenAI API Documentation](https://platform.openai.com/docs)
 
 ## 🎯 Roadmap
 
@@ -429,15 +730,35 @@ Full API documentation available at `http://localhost:8000/docs` when backend is
 - Email notifications
 - Voice support
 - Knowledge base management
+- **WhatsApp booking bot with AI conversations**
+- **Automated invoice generation via WhatsApp**
+- **24-hour cancellation policy with refunds**
+- **Add-ons system (projectors, screens, chairs)**
 
-### Planned 🎯
+### In Progress 🚧
 - Mobile app (React Native)
 - Advanced analytics dashboard
 - Multi-language support (Bahasa, Chinese)
+
+### Planned 🎯
 - Integration with access control systems
 - Member community features
 - Automated billing and invoicing
 - IoT device integration
+- WhatsApp group booking features
+- WhatsApp bot multi-language support
+- Voice message support for WhatsApp bot
+- Recurring bookings via WhatsApp
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📄 License
 
