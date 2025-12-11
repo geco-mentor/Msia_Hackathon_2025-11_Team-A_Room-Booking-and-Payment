@@ -1,0 +1,46 @@
+# FastAPI and server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# LangGraph and LangChain
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langchain-text-splitters>=0.3.0
+
+# RAG dependencies
+pypdf>=4.0.0
+tiktoken>=0.5.0
+
+# Stripe Agent Toolkit
+stripe-agent-toolkit>=0.1.0
+stripe>=10.0.0
+
+# Database
+supabase>=2.0.0
+
+# PDF generation
+fpdf2>=2.7.9
+
+# QR codes
+segno>=1.6.0
+
+# Email
+resend>=0.9.0
+
+# Configuration
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-dotenv>=1.0.0
+
+# JWT for auth validation
+python-jose[cryptography]>=3.3.0
+
+# HTTP client
+httpx>=0.25.0
+
+# Async support
+asyncio>=3.4.3
